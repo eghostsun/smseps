@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.3//EN"
+          "http://struts.apache.org/dtds/struts-config_1_3.dtd">
+
+<struts-config>
+
+    <form-beans>
+    	<form-bean name="orderForm" type="com.slf.sms.bo.Order"/>
+    </form-beans>
+
+    <global-forwards>
+    </global-forwards>
+
+    <action-mappings>
+    	<action path="/reqin"
+    			type="com.slf.sms.action.ReqInAction"
+    			name="orderForm"
+    			scope="request"
+    			validate="false"
+    			parameter="to"
+    	>
+    	</action>
+    	
+    	<action path="/loadagents"
+    			type="com.slf.sms.action.LoadAgentsAction"
+    			scope="request"
+    			validate="false"
+    	>
+    		<forward name="success" path="/loadagents.jsp"/>
+    	</action>
+    </action-mappings>
+    
+    <controller
+		contentType="text/html"
+		locale="false"
+		nocache="false"
+		processorClass="com.slf.sms.control.PerformControlProcessor"/>
+</struts-config>
+
+

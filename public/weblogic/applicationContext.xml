@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+        xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>SMSJNDI</value>
+		</property>
+	</bean>
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor" lazy-init="true" />  
+	
+	<bean id="oracleLobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler" lazy-init="true">  
+		<property name="nativeJdbcExtractor">  
+			<ref local="nativeJdbcExtractor"/>  
+		</property> 
+	</bean>
+
+	<!-- ibatis -->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">  
+		<property name="configLocation" value="classpath:conf/sql-map-config.xml" />  
+		<property name="dataSource" ref="dataSource" />  
+		<property name="lobHandler">  
+			<ref local="oracleLobHandler" />  
+		</property>  
+	</bean>
+	
+	<bean id="sqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient"/>
+		</property>
+	</bean>
+	
+	<bean id="baseDao" class="com.slf.common.base.impl.BaseDaoImpl">
+		<property name="sqlMapClientTemplate">
+			<ref local="sqlMapClientTemplate"/>
+		</property>
+	</bean>
+	
+	<!-- 事务管理 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+    <!-- the transactional semantics... -->
+	    <tx:attributes>
+	      <!-- other methods use the default transaction settings (see below) -->
+	      <tx:method name="*" read-only="false" rollback-for="SQLException"/>
+	    </tx:attributes>
+  	</tx:advice>
+
+	  <!-- ensure that the above transactional advice runs for any execution
+	      of an operation defined by the FooService interface -->
+	      
+  <aop:config>
+    <aop:pointcut id="bizOperation" expression="execution(* com.slf.sms.services.*.*(..))"/>
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="bizOperation"/>
+  </aop:config>
+		
+	<import resource="spring/spring-biz.xml"/>   
+	
+</beans>

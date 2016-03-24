@@ -1,0 +1,1 @@
+ant -buildfile build-tomcat.xml -Dbuildmode=release build

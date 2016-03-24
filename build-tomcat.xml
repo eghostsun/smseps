@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project basedir="." default="build" name="eps">  
+
+    <target name="init" description="设置初始化打 war 包需要的路径变量">  
+    	<!-- 项目原路径 -->
+        <property name="src" value="${basedir}/src"/>  
+    	<property name="webapp" value="${basedir}/WebContent"/>  
+        <property name="lib" value="${webapp}/WEB-INF/lib"/>  
+    	<property name="publicsrc" value="${basedir}/public/src"/>
+    	<property name="publicweb" value="${basedir}/public/tomcat"/>
+    	<!-- war打包路径 -->  
+        <property name="buildwebapp" value="${basedir}/AntBuild/WebContent"/>  
+        <property name="builddest" value="${buildwebapp}/WEB-INF/classes"/>  
+        <property name="destwar" value="${basedir}/AntBuild/war"/>  
+          
+        <property name="j2eelibdir" value="G:\\apache-tomcat-7.0.56\\lib"/>  
+          
+        <path id="classpath">  
+            <fileset dir="${j2eelibdir}">  
+                <include name="**/*.jar"/>  
+            </fileset>  
+            <fileset dir="${lib}">  
+                <include name="**/*.jar"/>  
+            </fileset>  
+			<fileset dir="F:\\jar_lib">
+				<include name="**/*.jar"/>
+			</fileset>
+        </path>  
+    </target>  
+	<target name="clean" depends="init" description="清除打包用临时文件">  
+	    <delete dir="${buildwebapp}"/>  
+	    <delete dir="${destwar}"/>  
+	</target>  
+    <target name="prepare" depends="init,clean" description="创建打包需要的路径，拷贝源文件到打包路径下"> 
+        <mkdir dir="${builddest}"/>  
+        <mkdir dir="${destwar}"/>  
+    </target>  
+      
+    <target name="complie" depends="prepare" description="编译 java 文件，拷贝 properties 属性配置文件到编译后的路径下">  
+        <javac target="1.6" encoding="utf-8" srcdir="${src}" destdir="${builddest}">  
+            <classpath refid="classpath"/>  
+        </javac>    
+    	<copy todir="${buildwebapp}">
+    		<fileset dir="${webapp}">
+    			<exclude name="**/applicationContext.xml"/>
+    			<exclude name="**/web.xml"/>
+    			<exclude name="**/*.properties"/>
+				<exclude name="**/*.class"/>
+    			<exclude name="**/*.jar"/>
+    			<include name="**" />
+    		</fileset>
+    	</copy>
+		<copy todir="${builddest}">  
+            <fileset dir="${src}">  
+				<exclude name="**/*.properties"/>
+            	<include name="**/*.xml"/>
+            	<include name="**/*.dtd"/>
+            </fileset>  
+			<fileset dir="${publicsrc}">
+    			<include name="**/*.properties"/>
+    		</fileset>
+        </copy>
+    	<copy todir="${buildwebapp}/WEB-INF">
+    		<fileset dir="${publicweb}">
+    			<include name="**/*.xml"/>
+    		</fileset>
+    	</copy>
+    </target>  
+	
+	 
+    <target name="build" depends="complie" description="打 war 包，不将 java 文件打入包内">  
+        <war warfile="${destwar}/smseps.war" webxml="${publicweb}/web.xml">  
+            <lib dir="${lib}">
+            	<include name="**"/>
+           	</lib>
+        	<fileset dir="${buildwebapp}"/>
+        </war>  
+    </target>  
+</project>

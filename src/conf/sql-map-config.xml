@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMapConfig      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<settings cacheModelsEnabled="true" enhancementEnabled="true" lazyLoadingEnabled="false"  
+         useStatementNamespaces="false" statementCachingEnabled="true" classInfoCacheEnabled="true" />  
+   
+    <typeHandler jdbcType="BLOB" javaType="[B"  
+         callback="org.springframework.orm.ibatis.support.BlobByteArrayTypeHandler" />  
+         
+    <typeHandler jdbcType="CLOB" javaType="java.lang.String"  
+         callback="org.springframework.orm.ibatis.support.ClobStringTypeHandler" />
+	
+	<sqlMap resource="conf/sql/callProcedure.xml"/>
+	<sqlMap resource="conf/sql/LS_QYDX_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/LS_DXHC_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/XX_QY_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/XX_DXGJZ_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/XX_DLQB_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/LS_MTSMS_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/LS_MOSMS_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/LS_DXHK_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/XX_YKYQ_SqlMap.xml"/>
+</sqlMapConfig>

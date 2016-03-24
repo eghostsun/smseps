@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="callP">
+	
+	<!-- 浙江移动充值(正和) -->
+	<parameterMap class="map" id="bzjMap">
+		<parameter property="DLID" mode="IN"/>
+		<parameter property="DXNR" mode="IN"/>
+		<parameter property="DXZS" mode="IN"/>
+		<parameter property="HMSL" mode="IN"/>
+		<parameter property="JRBZ" mode="IN"/>
+		<parameter property="DLFLSH" mode="IN"/>
+		<parameter property="MBBZ" mode="IN"/>
+		<parameter property="DSFSSJ" mode="IN"/>
+		<parameter property="DXHCID" mode="OUT" jdbcType="INTEGER" javaType="INTEGER"/>
+		<parameter property="retCode" mode="OUT" javaType="INTEGER" jdbcType="INTEGER" />
+		<parameter property="retMsg" mode="OUT" jdbcType="VARCHAR" javaType="String"/>
+	</parameterMap>	
+	
+	
+	<!-- 异常返回-过程 -->
+	<procedure id="TRAN_KBZJ" parameterMap="bzjMap">
+		{call $tableUser$YCSMS_TRANSACTION.TRAN_KBZJ(?,?,?,?,?,?,?,?,?,?,?)}
+	</procedure>
+	
+</sqlMap>

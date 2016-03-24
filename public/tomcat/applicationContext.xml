@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+        xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:/comp/env/SMSJNDI</value>
+		</property>
+	</bean>
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor" lazy-init="true" />  
+	
+	<bean id="oracleLobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler" lazy-init="true">  
+		<property name="nativeJdbcExtractor">  
+			<ref local="nativeJdbcExtractor"/>  
+		</property> 
+	</bean>
+
+	<!-- ibatis -->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">  
+		<property name="configLocation" value="classpath:conf/sql-map-config.xml" />  
+		<property name="dataSource" ref="dataSource" />  
+		<property name="lobHandler">  
+			<ref local="oracleLobHandler" />  
+		</property>  
+	</bean>
+	
+	<bean id="sqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient"/>
+		</property>
+	</bean>
+	
+	<bean id="baseDao" class="com.slf.common.base.impl.BaseDaoImpl">
+		<property name="sqlMapClientTemplate">
+			<ref local="sqlMapClientTemplate"/>
+		</property>
+	</bean>
+	
+	<!-- 事务管理 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+	    <tx:attributes>
+	      <!-- other methods use the default transaction settings (see below) -->
+	      <tx:method name="queryRecv" read-only="false" rollback-for="Exception"/>
+	    </tx:attributes>
+  	</tx:advice>
+
+  <!-- ensure that the above transactional advice runs for any execution
+      of an operation defined by the FooService interface -->
+      
+  <aop:config>
+    <aop:pointcut id="bizOperation" expression="execution(* com.slf.sms.services.impl.*.*(..))"/>
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="bizOperation"/>
+  </aop:config>
+  
+  <bean id="bizService" class="com.slf.sms.services.impl.BizServiceImpl">
+  	<property name="baseDao">
+  		<ref bean="baseDao"/>
+  	</property>
+  </bean>
+  
+  <bean id="reqService" class="com.slf.sms.services.impl.ReqServiceImpl">
+  	<property name="baseDao">
+  		<ref bean="baseDao"/>
+  	</property>
+  </bean>  
+  
+  <!-- TimesTen -->
+  
+  <bean id="ttDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:/comp/env/TTJNDI</value>
+		</property>
+	</bean>
+	
+	<bean id="ttTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="ttDataSource"/>
+	</bean>
+	
+	<bean id="ttSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">  
+		<property name="configLocation" value="classpath:conf/timesten-sql-map-config.xml" />  
+		<property name="dataSource" ref="ttDataSource" />  
+	</bean>
+	
+	<bean id="ttSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient">
+			<ref local="ttSqlMapClient"/>
+		</property>
+	</bean>
+  
+	<bean id="ttBaseDao" class="com.slf.common.base.impl.BaseDaoImpl">
+		<property name="sqlMapClientTemplate">
+			<ref local="ttSqlMapClientTemplate"/>
+		</property>
+	</bean>
+	
+	<!-- 事务管理 -->
+	<tx:advice id="ttTxAdvice" transaction-manager="ttTransactionManager">
+	    <tx:attributes>
+	      <!-- other methods use the default transaction settings (see below) -->
+	      <tx:method name="querySmsStatus" read-only="false" rollback-for="Exception"/>
+	      <tx:method name="updateBatchStatus" read-only="false" rollback-for="SQLException"/>
+	    </tx:attributes>
+  	</tx:advice>
+	
+	<aop:config>
+    	<aop:pointcut id="ttBizOperation" expression="execution(* com.slf.sms.biz.impl.*.*(..))"/>
+   		<aop:advisor advice-ref="ttTxAdvice" pointcut-ref="ttBizOperation"/>
+  	</aop:config>
+  	
+  	<bean id="timestenBiz" class="com.slf.sms.biz.impl.TimestenBizImpl">
+	  	<property name="ttBaseDao">
+	  		<ref bean="ttBaseDao"/>
+	  	</property>
+  	</bean>
+  	
+  	
+  	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
+	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<property name="locations">
+				<list>
+					<value>classpath:engine.properties</value>
+				</list>
+			</property>
+	</bean>
+  	<!-- redis -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig" >
+		<property name="maxActive" value="50"/>
+		<property name="maxIdle" value="30"/>
+		<property name="maxWait" value="3000" />
+		<property name="minIdle" value="2"/>
+		<property name="testOnBorrow" value="true" />
+	</bean>
+	
+	<bean id="jedisFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="port" value="${redis.port}"/>
+		<property name="hostName" value="${redis.ip}"/>
+		<property name="poolConfig" >
+			<ref local="jedisPoolConfig"/>
+		</property>
+		<property name="timeout" value="${redis.timeout}"/>
+	</bean>
+	
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory">
+			<ref local="jedisFactory"/>
+		</property>
+	</bean>
+	
+</beans>
