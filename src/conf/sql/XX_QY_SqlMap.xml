@@ -28,11 +28,12 @@
     <result column="HZBMDBZ" jdbcType="CHAR" property="hzbmdbz" />
     <result column="YXFSBZ" jdbcType="CHAR" property="yxfsbz" nullValue="0"/>
     <result column="KQBZ" jdbcType="CHAR" property="kqbz" nullValue="0" />
+    <result property="jrhppbz" jdbcType="CHAR" column="JRHPPBZ" nullValue="0"/>
   </resultMap>
   
   
   <select id="getAllQydl" parameterClass="java.lang.String" resultMap="result1">
-  	select t.dlid, t.dlm, t.jym, b.gjzjyzt,c.nrzs,b.hzbmdbz,b.yxfsbz,b.kqbz
+  	select t.dlid, t.dlm, t.jym, b.gjzjyzt,c.nrzs,b.hzbmdbz,b.yxfsbz,b.kqbz,b.jrhppbz
 	  from $tableUser$xx_qy t
 	 inner join $tableUser$xx_dl b on b.dlid = t.dlid
 	 inner join $tableUser$xx_dljg c on c.dlid = t.dlid

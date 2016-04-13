@@ -64,7 +64,18 @@ public class XxQy extends BaseObj {
     
     private int kqbz; //一客一签开启标志 1开启 0不开启
     
-    public int getKqbz() {
+    private int jrhppbz; //2016-04-05 sxw 接入号替换标志 0不替换 1替换
+
+    
+    public int getJrhppbz() {
+		return jrhppbz;
+	}
+
+	public void setJrhppbz(int jrhppbz) {
+		this.jrhppbz = jrhppbz;
+	}
+
+	public int getKqbz() {
 		return kqbz;
 	}
 

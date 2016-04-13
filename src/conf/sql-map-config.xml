@@ -24,4 +24,5 @@
 	<sqlMap resource="conf/sql/LS_MOSMS_SqlMap.xml"/>
 	<sqlMap resource="conf/sql/LS_DXHK_SqlMap.xml"/>
 	<sqlMap resource="conf/sql/XX_YKYQ_SqlMap.xml"/>
+	<sqlMap resource="conf/sql/XX_JRHPP_SqlMap.xml"/>
 </sqlMapConfig>

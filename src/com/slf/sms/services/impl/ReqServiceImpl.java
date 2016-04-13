@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
@@ -29,6 +30,7 @@ import com.slf.sms.bo.LsDxhc;
 import com.slf.sms.bo.LsMosms;
 import com.slf.sms.bo.Order;
 import com.slf.sms.bo.XxDxgjz;
+import com.slf.sms.bo.XxJrhpp;
 import com.slf.sms.bo.XxQy;
 import com.slf.sms.bo.XxYkyq;
 import com.slf.sms.common.CommonContants;
@@ -280,6 +282,29 @@ public class ReqServiceImpl implements IReqService {
 					order.setResult(ErrorCode.MSGS_ERROR.getMsg());
 					return order;
 				}
+				
+				/* 新增根据短信签名替换接入号 2016-04-5 */
+				// 需要替换接入号
+				if (xxQy.getJrhppbz() == 1) {
+					
+					XxJrhpp xxJrhpp = new XxJrhpp();
+					xxJrhpp.setDlid(xxQy.getDlid());
+					xxJrhpp.setDxqm(Utils.getSuffix(content));
+					// 根据签名检索接入号
+					xxJrhpp = (XxJrhpp) this.baseDao.getObject(xxJrhpp, "getJrhppbz");
+					
+					if (xxJrhpp != null && StringUtils.isNotBlank(xxJrhpp.getDxjrh())) {
+						// 不存在符合要求的接入号
+						if (!Utils.check4Num(xxJrhpp.getDxjrh().trim())) {
+							order.setStatus(ErrorCode.SUBMIT_ERROR.getCode());
+							order.setResult(ErrorCode.SUBMIT_ERROR.getMsg());
+							return order;
+						}
+						order.setNumber(xxJrhpp.getDxjrh().trim());
+					}
+				}
+				/* 新增根据短信签名替换接入号 2016-04-5 */
+				
 				//扣保证金
 				CallPMap pMap = CallProcedureHelper.makebzj2(order,msg, xxQy);
 				baseDao.callProcedure(pMap, "TRAN_KBZJ");
