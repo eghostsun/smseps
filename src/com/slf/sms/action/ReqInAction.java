@@ -189,7 +189,7 @@ public class ReqInAction extends com.slf.common.base.BaseAction {
 		Order order = (Order)form;
 		final String orderId = "orderId" + order.getOrderId();
 		BaseResultMap RESULT_MAP = new BaseResultMap();
-		log.info("提交请求[sendsms]->orderId:" + order.getOrderId() + " dateOrder:" + order.getDateOrder() + " msgType" + order.getMsgType() + " number" + order.getNumber() + 
+		log.info("提交请求[sendsms]->orderId:" + order.getOrderId() + " dateOrder:" + order.getDateOrder() + " msgType:" + order.getMsgType() + " number" + order.getNumber() + 
 				" userId:" + order.getUserId() + " msg:" + order.getMsgs());
 		XxQy xxQy = this.getUserToken(order.getUserId());
 		try{
